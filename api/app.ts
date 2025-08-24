@@ -3,6 +3,7 @@
 import { Hono } from 'hono';
 import getConfig from './config/index.js';
 import { defaultCorsMiddleware } from './middleware/cors.js';
+import type { AppOptions } from './types/index.js';
 
 // Import endpoint handlers
 import {
@@ -26,10 +27,8 @@ import {
 
 /**
  * Create the main Hono application
- * @param {Object} options - App options for dependency injection
- * @returns {Object} Configured Hono app
  */
-export const createApp = (options = {}) => {
+export const createApp = (options: AppOptions = {}): Hono => {
   const config = getConfig();
   const app = new Hono();
   
@@ -127,9 +126,9 @@ export const createApp = (options = {}) => {
 };
 
 // Create default app instance
-let appInstance = null;
+let appInstance: Hono | null = null;
 
-export const getApp = () => {
+export const getApp = (): Hono => {
   if (!appInstance) {
     appInstance = createApp();
   }
@@ -137,7 +136,7 @@ export const getApp = () => {
 };
 
 // For testing - allow app reset
-export const resetApp = () => {
+export const resetApp = (): void => {
   appInstance = null;
 };
 

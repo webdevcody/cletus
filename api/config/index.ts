@@ -1,7 +1,9 @@
 // Configuration module for Cletus API
 // Supports environment-based configuration and mock modes for testing
 
-const getConfig = () => {
+import type { AppConfig } from '../types/index.js';
+
+const getConfig = (): AppConfig => {
   const config = {
     // Server configuration
     port: parseInt(process.env.PORT || process.env.CLETUS_PORT || '1337'),
@@ -19,7 +21,7 @@ const getConfig = () => {
     
     // Storage configuration
     storage: {
-      backend: process.env.STORAGE_BACKEND || 'memory', // memory, file, redis
+      backend: (process.env.STORAGE_BACKEND || 'memory') as 'memory' | 'file' | 'redis', // memory, file, redis
       maxJobsInMemory: parseInt(process.env.MAX_JOBS_IN_MEMORY || '1000'),
       maxOutputChunks: parseInt(process.env.MAX_OUTPUT_CHUNKS || '1000'),
       persistenceDir: process.env.PERSISTENCE_DIR || './data',
@@ -35,7 +37,7 @@ const getConfig = () => {
     
     // Logging configuration
     logging: {
-      level: process.env.LOG_LEVEL || 'info',
+      level: (process.env.LOG_LEVEL || 'info') as 'debug' | 'info' | 'warn' | 'error',
       colorize: process.env.LOG_COLORIZE !== 'false', // Default true
       timestamp: process.env.LOG_TIMESTAMP !== 'false', // Default true
     },
@@ -59,7 +61,7 @@ const getConfig = () => {
   return config;
 };
 
-const validateConfig = (config) => {
+const validateConfig = (config: AppConfig): void => {
   // Validate port
   if (config.port < 1 || config.port > 65535) {
     throw new Error(`Invalid port number: ${config.port}`);
@@ -84,16 +86,16 @@ const validateConfig = (config) => {
 };
 
 // Create singleton config instance
-let configInstance = null;
+let configInstance: AppConfig | null = null;
 
-export const initConfig = () => {
+export const initConfig = (): AppConfig => {
   if (!configInstance) {
     configInstance = getConfig();
   }
   return configInstance;
 };
 
-export const getConfigInstance = () => {
+export const getConfigInstance = (): AppConfig => {
   if (!configInstance) {
     configInstance = getConfig();
   }
@@ -101,7 +103,7 @@ export const getConfigInstance = () => {
 };
 
 // For testing - allow config reset
-export const resetConfig = () => {
+export const resetConfig = (): void => {
   configInstance = null;
 };
 

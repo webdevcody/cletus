@@ -11,12 +11,12 @@ export default {
   
   // Test file patterns
   testRegex: [
-    'tests/**/*.test.js'
+    'tests/**/*.test.ts'
   ],
   
   // Setup files
   preload: [
-    './tests/setup.js'
+    './tests/setup.ts'
   ],
   
   // Test timeout
@@ -30,7 +30,7 @@ export default {
     enabled: true,
     dir: './coverage',
     include: [
-      'api/**/*.js'
+      'api/**/*.ts'
     ],
     exclude: [
       'tests/**',

@@ -26,7 +26,7 @@ const currentPathLabel = document.getElementById("currentPath");
 const modelSelect = document.getElementById("modelSelect");
 
 let jobCounter = 0;
-const jobs = new Map(); // id -> { id, color, text, startedAt, finishedAt, status, prompt }
+const jobs = new Map(); // id -> { id, color, text, startedAt, finishedAt, status, prompt, sourceUrl, sourceTab }
 
 const POLLING_INTERVAL_MS = 1000;
 let pollingIntervalId = null;
@@ -39,6 +39,32 @@ let lastOutputTimestamp = 0;
 // Path tracking
 let currentPagePath = "/loading...";
 
+// Job tracking with persistent storage
+// This extension now tracks job metadata including the source URL and tab where the job was created.
+// Users can navigate back to the original page by clicking the ↗ button next to completed jobs.
+async function saveTrackedJobs() {
+  try {
+    const jobsArray = Array.from(jobs.entries()).map(([id, job]) => [id, job]);
+    await chrome.storage.local.set({ trackedJobs: jobsArray });
+  } catch (error) {
+    console.error("Failed to save tracked jobs:", error);
+  }
+}
+
+async function loadTrackedJobs() {
+  try {
+    const result = await chrome.storage.local.get('trackedJobs');
+    if (result.trackedJobs && Array.isArray(result.trackedJobs)) {
+      jobs.clear();
+      result.trackedJobs.forEach(([id, job]) => {
+        jobs.set(id, job);
+      });
+    }
+  } catch (error) {
+    console.error("Failed to load tracked jobs:", error);
+  }
+}
+
 function updatePathLabel(path) {
   currentPagePath = path || "/unknown";
   if (currentPathLabel) {
@@ -50,16 +76,36 @@ function updatePathLabel(path) {
 async function loadJobsFromServer() {
   try {
     const response = await fetch("http://localhost:1337/jobs");
-    if (!response.ok) return;
+    if (!response.ok) {
+      // Server might not be available, but we still show tracked jobs
+      markOfflineJobs();
+      return;
+    }
     const data = await response.json();
     updateJobsFromServer(data.jobs || []);
   } catch (error) {
     console.error("Failed to load jobs from server:", error);
+    // Server might not be available, but we still show tracked jobs
+    markOfflineJobs();
+  }
+}
+
+// Mark jobs as offline if server is not available
+function markOfflineJobs() {
+  let hasChanges = false;
+  jobs.forEach((job) => {
+    if (job.status === "running" || job.status === "pending") {
+      job.status = "offline";
+      hasChanges = true;
+    }
+  });
+  if (hasChanges) {
+    renderJobs();
   }
 }
 
 function updateJobsFromServer(serverJobs) {
-  // Sync local jobs with server jobs; keep only minimal fields needed for UI
+  // Sync local jobs with server jobs; preserve tracked fields
   for (const job of serverJobs) {
     const prev = jobs.get(job.id);
     jobs.set(job.id, {
@@ -70,11 +116,14 @@ function updateJobsFromServer(serverJobs) {
       finishedAt: job.finishedAt,
       status: job.status,
       prompt: job.prompt,
+      sourceUrl: prev?.sourceUrl || null, // Preserve tracked source URL
+      sourceTab: prev?.sourceTab || null, // Preserve tracked source tab
     });
   }
 
   renderJobs();
   ensurePollingState();
+  saveTrackedJobs(); // Save updated jobs to storage
 }
 
 function ensurePollingState() {
@@ -170,6 +219,34 @@ function restoreModelSelection() {
   }
 }
 
+// Navigate to the original page where the job was created
+async function navigateToJobSource(jobId) {
+  const job = jobs.get(jobId);
+  if (!job || !job.sourceUrl) {
+    console.error("No source URL found for job:", jobId);
+    return;
+  }
+
+  try {
+    // Try to find existing tab with the same URL
+    const tabs = await chrome.tabs.query({ url: job.sourceUrl });
+    if (tabs.length > 0) {
+      // Switch to existing tab
+      await chrome.tabs.update(tabs[0].id, { active: true });
+      await chrome.windows.update(tabs[0].windowId, { focused: true });
+    } else {
+      // Create new tab
+      await chrome.tabs.create({ url: job.sourceUrl, active: true });
+    }
+    
+    // Close the popup
+    window.close();
+  } catch (error) {
+    console.error("Failed to navigate to job source:", error);
+    setStatus("Could not navigate to original page.");
+  }
+}
+
 // Dismiss a job from both UI and server
 async function dismissJob(jobId, clickedElement) {
   try {
@@ -195,6 +272,7 @@ async function dismissJob(jobId, clickedElement) {
     if (row) row.remove();
 
     ensurePollingState();
+    saveTrackedJobs(); // Save after removing job
   } catch (error) {
     console.error("Failed to dismiss job:", error);
     setStatus("Could not dismiss job. Try again.");
@@ -205,7 +283,8 @@ async function dismissJob(jobId, clickedElement) {
 
 // Load jobs and restore last input when popup opens
 document.addEventListener("DOMContentLoaded", async () => {
-  loadJobsFromServer();
+  await loadTrackedJobs(); // Load tracked jobs from storage first
+  loadJobsFromServer(); // Then sync with server
   restoreLastInput();
   restoreModelSelection();
 
@@ -240,7 +319,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
   }
 
-  // Handle job interactions: dismiss buttons and row clicks
+  // Handle job interactions: dismiss buttons, navigation buttons, and row clicks
   if (jobsEl) {
     jobsEl.addEventListener("click", (e) => {
       const dismissButton = e.target.closest("[data-dismiss-job]");
@@ -249,6 +328,15 @@ document.addEventListener("DOMContentLoaded", async () => {
         e.stopPropagation();
         const jobId = dismissButton.getAttribute("data-dismiss-job");
         dismissJob(jobId, dismissButton);
+        return;
+      }
+
+      const navigateButton = e.target.closest("[data-navigate-job]");
+      if (navigateButton) {
+        e.preventDefault();
+        e.stopPropagation();
+        const jobId = navigateButton.getAttribute("data-navigate-job");
+        navigateToJobSource(jobId);
         return;
       }
 
@@ -457,6 +545,8 @@ document.getElementById("send").addEventListener("click", async () => {
           color: generateHighContrastColor(),
           prompt: prompt,
           status: "running",
+          sourceUrl: tab?.url,
+          sourceTab: tab?.id,
         });
         startPolling();
 
@@ -498,7 +588,7 @@ function generateHighContrastColor() {
   return `hsl(${hue} ${saturation}% ${lightness}%)`;
 }
 
-function ensureJob(id, { color, prompt, status }) {
+function ensureJob(id, { color, prompt, status, sourceUrl, sourceTab }) {
   if (!jobs.has(id)) {
     jobs.set(id, {
       id,
@@ -508,8 +598,11 @@ function ensureJob(id, { color, prompt, status }) {
       finishedAt: null,
       prompt: prompt || id,
       status: status || "pending",
+      sourceUrl: sourceUrl || null,
+      sourceTab: sourceTab || null,
     });
     renderJobs();
+    saveTrackedJobs(); // Save after adding new job
   }
 }
 
@@ -529,8 +622,10 @@ function renderJobs() {
         ? "Done"
         : job.status === "failed"
           ? "Failed"
-          : "Running";
-    const isDone = job.status === "completed" || job.status === "failed";
+          : job.status === "offline"
+            ? "Offline"
+            : "Running";
+    const isDone = job.status === "completed" || job.status === "failed" || job.status === "offline";
     const shortPrompt = job.prompt
       ? job.prompt.length > 30
         ? job.prompt.substring(0, 30) + "..."
@@ -543,6 +638,8 @@ function renderJobs() {
       circleColor = "#22c55e"; // Green for completed
     } else if (job.status === "failed") {
       circleColor = "#ef4444"; // Red for failed
+    } else if (job.status === "offline") {
+      circleColor = "#94a3b8"; // Gray for offline
     }
 
     // Create job row element (now clickable)
@@ -550,6 +647,13 @@ function renderJobs() {
     jobRow.style.cssText = `display:flex; align-items:center; gap:6px; padding: 4px; border-radius: 4px;`;
     jobRow.setAttribute("data-job-id", job.id);
     jobRow.classList.add("clickable-job");
+    
+    // Add tooltip to indicate source page if available
+    if (job.sourceUrl) {
+      jobRow.title = `Click to view output • Original page: ${job.sourceUrl}`;
+    } else {
+      jobRow.title = "Click to view output";
+    }
 
     // Create circle indicator
     const circle = document.createElement("span");
@@ -563,18 +667,34 @@ function renderJobs() {
 
     // Create status text
     const statusSpan = document.createElement("span");
-    statusSpan.style.cssText = `color: ${job.status === "failed" ? "#ef4444" : "inherit"}`;
+    const statusColor = 
+      job.status === "failed" ? "#ef4444" : 
+      job.status === "offline" ? "#94a3b8" : 
+      "inherit";
+    statusSpan.style.cssText = `color: ${statusColor}`;
     statusSpan.textContent = status;
 
     // Append elements
     jobRow.appendChild(circle);
     jobRow.appendChild(promptSpan);
     jobRow.appendChild(statusSpan);
+    
+    // Add navigation button if we have source URL
+    if (job.sourceUrl) {
+      const navBtn = document.createElement("button");
+      navBtn.style.cssText =
+        "margin-left: 4px; padding: 2px 6px; font-size: 12px; background: var(--primary); color: var(--primary-foreground); border: none; border-radius: 4px; cursor: pointer; min-width: 20px; height: 20px; display: flex; align-items: center; justify-content: center;";
+      navBtn.textContent = "↗";
+      navBtn.title = `Go to original page: ${job.sourceUrl}`;
+      navBtn.setAttribute("data-navigate-job", job.id);
+      jobRow.appendChild(navBtn);
+    }
+    
     // Dismiss button for completed/failed jobs
     if (isDone) {
       const dismissBtn = document.createElement("button");
       dismissBtn.style.cssText =
-        "margin-left: auto; padding: 2px 6px; font-size: 14px; font-weight: bold; background: #ef4444; color: white; border: none; border-radius: 6px; cursor: pointer; min-width: 24px; height: 24px; display: flex; align-items: center; justify-content: center;";
+        "margin-left: 4px; padding: 2px 6px; font-size: 14px; font-weight: bold; background: #ef4444; color: white; border: none; border-radius: 6px; cursor: pointer; min-width: 24px; height: 24px; display: flex; align-items: center; justify-content: center;";
       dismissBtn.textContent = "×";
       dismissBtn.setAttribute("data-dismiss-job", job.id);
       jobRow.appendChild(dismissBtn);

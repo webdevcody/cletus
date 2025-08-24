@@ -11,11 +11,12 @@ import {
   formatOutputChunk,
   addJobPrefix 
 } from '../utils/output-parser.js';
+import type { Job, AppOptions } from '../types/index.js';
 
 /**
  * Create a job service instance
  */
-export const createJobService = (options = {}) => {
+export const createJobService = (options: AppOptions = {}) => {
   const config = getConfig();
   const storage = options.storage || getStorage();
   const claudeService = options.claudeService || getClaudeService();
@@ -24,7 +25,7 @@ export const createJobService = (options = {}) => {
     /**
      * Create a new job
      */
-    async createJob(prompt, jobOptions = {}, jobId = null) {
+    async createJob(prompt: string, jobOptions: any = {}, jobId: string | null = null): Promise<Job> {
       // Generate job ID if not provided
       const id = jobId || generateJobId();
       

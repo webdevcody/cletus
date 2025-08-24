@@ -44,7 +44,7 @@ try {
 }
 
 // Graceful shutdown handling
-const shutdown = async (signal) => {
+const shutdown = async (signal: string) => {
   console.log(`\n📤 Received ${signal}, shutting down gracefully...`);
   
   try {

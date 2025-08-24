@@ -2,18 +2,19 @@
   "name": "cletus",
   "type": "module",
   "version": "2.0.0",
-  "main": "api/server.js",
+  "main": "api/server.ts",
   "bin": {
     "cletus": "./bin/cletus"
   },
   "scripts": {
-    "dev": "bun run --hot api/server.js",
-    "start": "bun run api/server.js",
+    "dev": "bun run --hot api/server.ts",
+    "start": "bun run api/server.ts",
     "test": "bun test --config bun.test.config.js",
     "test:watch": "bun test --watch --config bun.test.config.js",
     "test:coverage": "bun test --coverage --config bun.test.config.js",
     "test:integration": "bun test tests/integration/ --config bun.test.config.js",
     "test:unit": "bun test tests/unit/ --config bun.test.config.js",
+    "type-check": "tsc --noEmit",
     "lint": "echo 'Add linting tool here (eslint, biome, etc.)'",
     "format": "echo 'Add formatting tool here (prettier, biome, etc.)'",
     "clean": "rm -rf coverage/ node_modules/.cache/"
@@ -26,7 +27,7 @@
     "chalk": "^5.3.0",
     "hono": "^4.8.12"
   },
-  "devDependencies": {},
+  "devDependencies": { "@types/bun": "^1.2.20", "@types/node": "^24.3.0", "typescript": "^5.9.2" },
   "engines": {
     "bun": ">=1.0.0"
   }
