@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cletus Extension Development</title>
+    <script>
+        // Initialize theme before content loads to prevent flash
+        (function() {
+            const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            if (isDark) {
+                document.documentElement.classList.add('dark');
+            }
+        })();
+    </script>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #ffffff;
+            color: #1f2937;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        .dark body {
+            background: #0b1220;
+            color: #e5e7eb;
+        }
+        h1 { 
+            color: #0891b2;
+            transition: color 0.3s;
+        }
+        .dark h1 { 
+            color: #38bdf8; 
+        }
+        .info-box {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+        .dark .info-box {
+            background: #0f172a;
+            border: 1px solid #1f2937;
+        }
+        .step {
+            background: #f1f5f9;
+            border-left: 3px solid #0891b2;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 4px;
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+        .dark .step {
+            background: #111827;
+            border-left: 3px solid #38bdf8;
+        }
+        code {
+            background: #f1f5f9;
+            padding: 2px 6px;
+            border-radius: 3px;
+            color: #d97706;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        .dark code {
+            background: #1f2937;
+            color: #fbbf24;
+        }
+        a { 
+            color: #0891b2; 
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+        .dark a { 
+            color: #38bdf8; 
+        }
+        a:hover { text-decoration: underline; }
+        .status { 
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .status.running { background: #22c55e; color: white; }
+        .status.info { background: #3b82f6; color: white; }
+    </style>
+</head>
+<body>
+    <h1>🚀 Cletus Extension Development</h1>
+    
+    <div class="info-box">
+        <p><strong>⚠️ Chrome extensions cannot run in a traditional dev server!</strong></p>
+        <p>This is a Chrome extension, not a web app. You need to load it into Chrome to test it.</p>
+        <p><span class="status running">BUILD WATCHING</span> The extension is being built in watch mode.</p>
+    </div>
+
+    <h2>📋 How to Load the Extension</h2>
+    
+    <div class="step">
+        <h3>Step 1: Open Chrome Extensions</h3>
+        <p>Navigate to <code>chrome://extensions/</code> in Chrome</p>
+    </div>
+    
+    <div class="step">
+        <h3>Step 2: Enable Developer Mode</h3>
+        <p>Toggle "Developer mode" in the top right corner</p>
+    </div>
+    
+    <div class="step">
+        <h3>Step 3: Load Unpacked Extension</h3>
+        <p>Click "Load unpacked" and select: <code>packages/extension/dist</code></p>
+    </div>
+    
+    <div class="step">
+        <h3>Step 4: Test the Extension</h3>
+        <ul>
+            <li><strong>Popup:</strong> Click the extension icon in Chrome toolbar</li>
+            <li><strong>Options:</strong> Right-click extension icon → "Options"</li>
+            <li><strong>Content Script:</strong> Navigate to any webpage</li>
+        </ul>
+    </div>
+
+    <h2>🔄 Development Workflow</h2>
+    
+    <div class="info-box">
+        <p><span class="status info">WATCH MODE</span> Files are automatically rebuilt when you save changes.</p>
+        <ol>
+            <li>Make changes to files in <code>src/</code></li>
+            <li>Save your changes (Vite rebuilds automatically)</li>
+            <li>Go to <code>chrome://extensions/</code></li>
+            <li>Click the reload icon on your extension card</li>
+        </ol>
+    </div>
+
+    <h2>📁 Built Files Location</h2>
+    <div class="info-box">
+        <p>Your built extension files are in:</p>
+        <p><code>/packages/extension/dist/</code></p>
+        <p>This directory contains:</p>
+        <ul>
+            <li><code>manifest.json</code> - Extension configuration</li>
+            <li><code>popup.html</code> - Extension popup</li>
+            <li><code>options.html</code> - Settings page</li>
+            <li><code>content.js</code> - Content script</li>
+            <li>All compiled JavaScript and CSS files</li>
+        </ul>
+    </div>
+
+    <h2>🛠️ Debugging</h2>
+    <div class="info-box">
+        <ul>
+            <li><strong>Popup DevTools:</strong> Right-click extension icon → "Inspect popup"</li>
+            <li><strong>Options DevTools:</strong> Open options → Right-click → "Inspect"</li>
+            <li><strong>Content Script:</strong> F12 → Console → Select "Content scripts" context</li>
+        </ul>
+    </div>
+
+    <script>
+        // Show the current time to indicate the page is live
+        setInterval(() => {
+            const now = new Date().toLocaleTimeString();
+            document.title = `Cletus Extension Dev - ${now}`;
+        }, 1000);
+
+        // Listen for system theme changes
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+            if (e.matches) {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+        });
+    </script>
+</body>
+</html>

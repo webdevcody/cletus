@@ -1,0 +1,180 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap");
+
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
+@config "../../tailwind.config.mjs";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  /* Base theme colors */
+  --background: 0 0% 98%;
+  --foreground: 222 84% 5%;
+  --muted: 220 14% 92%;
+  --muted-foreground: 220 9% 35%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 222 84% 5%;
+  --border: 220 13% 82%;
+  --input: 220 13% 82%;
+  --card: 0 0% 100%;
+  --card-foreground: 222 84% 5%;
+  --primary: 199 89% 35%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 220 14% 92%;
+  --secondary-foreground: 222 84% 5%;
+  --accent: 199 95% 95%;
+  --accent-foreground: 199 89% 35%;
+  --destructive: 0 84% 50%;
+  --destructive-foreground: 0 0% 100%;
+  --ring: 199 89% 35%;
+  --radius: 0.5rem;
+
+  /* Sidebar theme */
+  --sidebar-background: 0 0% 99%;
+  --sidebar-foreground: 222 84% 5%;
+  --sidebar-primary: 199 89% 35%;
+  --sidebar-primary-foreground: 0 0% 100%;
+  --sidebar-accent: 199 95% 94%;
+  --sidebar-accent-foreground: 199 89% 35%;
+  --sidebar-border: 220 13% 85%;
+  --sidebar-ring: 199 89% 48%;
+}
+
+.dark {
+  --background: 222 47% 7%;
+  --foreground: 213 31% 91%;
+  --muted: 220 47% 15%;
+  --muted-foreground: 215.4 16.3% 56.9%;
+  --accent: 217 33% 17%;
+  --accent-foreground: 210 40% 98%;
+  --popover: 222 47% 7%;
+  --popover-foreground: 215 20.2% 65.1%;
+  --border: 217 33% 17%;
+  --input: 217 33% 17%;
+  --card: 220 47% 11%;
+  --card-foreground: 213 31% 91%;
+  --primary: 210 40% 98%;
+  --primary-foreground: 222.2 47.4% 1.2%;
+  --secondary: 222.2 47.4% 11.2%;
+  --secondary-foreground: 210 40% 98%;
+  --destructive: 0 84% 50%;
+  --destructive-foreground: 210 40% 98%;
+  --ring: 199 89% 60%;
+
+  /* Sidebar theme for dark mode */
+  --sidebar-background: 222 47% 7%;
+  --sidebar-foreground: 213 31% 91%;
+  --sidebar-primary: 210 40% 98%;
+  --sidebar-primary-foreground: 222.2 47.4% 1.2%;
+  --sidebar-accent: 217 33% 17%;
+  --sidebar-accent-foreground: 210 40% 98%;
+  --sidebar-border: 217 33% 17%;
+  --sidebar-ring: 217 33% 17%;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply font-sans antialiased bg-background text-foreground w-full;
+  }
+}
+
+/* Only keeping classes that are actually reused across multiple components */
+@layer components {
+  /* Module cards - used extensively across learn pages */
+  .module-card {
+    @apply relative overflow-hidden rounded-xl bg-gradient-to-br from-white to-gray-50/50 dark:from-gray-900 dark:to-gray-800/50 border border-gray-200/60 dark:border-gray-700/60 shadow-elevation-2 hover:shadow-elevation-3 transition-all duration-300;
+  }
+
+  .module-card::before {
+    content: '';
+    @apply absolute inset-0 bg-gradient-to-br from-theme-500/5 to-transparent opacity-0 transition-opacity duration-300 pointer-events-none;
+  }
+
+  .module-card:hover::before {
+    @apply opacity-100;
+  }
+
+  /* Button styles - used across multiple forms */
+  .btn-gradient {
+    @apply bg-gradient-to-r from-theme-500 to-theme-600 hover:from-theme-600 hover:to-blue-600 text-white shadow-lg hover:shadow-glow-cyan transition-all duration-300;
+  }
+
+  /* Text gradients - used in multiple headers */
+  .text-gradient {
+    @apply bg-gradient-to-r from-theme-600 to-theme-500 bg-clip-text text-transparent;
+  }
+
+  .text-description {
+    @apply text-xl text-muted-foreground leading-relaxed;
+  }
+
+  /* Hero backgrounds - used across multiple pages */
+  .hero-background-ai {
+    @apply bg-gradient-to-br from-background via-theme-50/20 to-theme-100/30 dark:from-background dark:via-theme-950/30 dark:to-theme-900/50;
+  }
+
+  /* Circuit pattern - used in multiple hero sections */
+  .circuit-pattern {
+    background-image: radial-gradient(circle at 1px 1px, rgba(6, 182, 212, 0.3) 1px, transparent 0);
+    background-size: 20px 20px;
+  }
+
+  /* Floating elements - used across hero sections */
+  .floating-element-1 {
+    @apply absolute top-1/4 left-1/4 w-96 h-96 bg-theme-500/5 dark:bg-theme-500/10 rounded-full blur-3xl animate-pulse;
+  }
+
+  .floating-element-2 {
+    @apply absolute bottom-1/4 right-1/4 w-80 h-80 bg-blue-500/5 dark:bg-blue-500/10 rounded-full blur-3xl animate-pulse;
+    animation-delay: 1000ms;
+  }
+
+  .floating-element-3 {
+    @apply absolute top-1/2 left-1/2 w-64 h-64 bg-theme-400/4 dark:bg-theme-400/8 rounded-full blur-3xl animate-pulse;
+    animation-delay: 500ms;
+  }
+
+  .floating-element-small {
+    @apply absolute w-32 h-32 bg-theme-300/3 dark:bg-theme-300/6 rounded-full blur-2xl animate-float;
+  }
+
+  /* Section dividers - used across multiple sections */
+  .section-divider-glow-top {
+    @apply absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-theme-500/50 to-transparent;
+  }
+
+  .section-divider-glow-bottom {
+    @apply absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-theme-500/50 to-transparent;
+  }
+
+  /* Video player enhancements - used in hero and pricing */
+  .video-container {
+    @apply relative p-1 rounded-2xl bg-gradient-to-br from-background/20 via-background/10 to-background/5 backdrop-blur-sm;
+  }
+
+  .video-wrapper {
+    @apply rounded-xl overflow-hidden bg-background/20 backdrop-blur-sm shadow-elevation-3;
+  }
+
+  .video-decorative-1 {
+    @apply absolute -top-4 -right-4 w-8 h-8 bg-theme-400/30 rounded-full blur-sm;
+  }
+
+  .video-decorative-2 {
+    @apply absolute -bottom-4 -left-4 w-6 h-6 bg-theme-500/30 rounded-full blur-sm;
+  }
+}
+
+a {
+  cursor: pointer;
+}
+
+/* Hide reCAPTCHA logo/badge */
+.grecaptcha-badge {
+  visibility: hidden !important;
+}

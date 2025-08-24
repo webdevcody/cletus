@@ -1,34 +1,42 @@
 {
-  "name": "cletus",
-  "type": "module",
+  "name": "cletus-monorepo",
+  "private": true,
   "version": "2.0.0",
-  "main": "api/server.ts",
-  "bin": {
-    "cletus": "./bin/cletus"
-  },
-  "scripts": {
-    "dev": "bun run --hot api/server.ts",
-    "start": "bun run api/server.ts",
-    "test": "bun test --config bun.test.config.js",
-    "test:watch": "bun test --watch --config bun.test.config.js",
-    "test:coverage": "bun test --coverage --config bun.test.config.js",
-    "test:integration": "bun test tests/integration/ --config bun.test.config.js",
-    "test:unit": "bun test tests/unit/ --config bun.test.config.js",
-    "type-check": "tsc --noEmit",
-    "lint": "echo 'Add linting tool here (eslint, biome, etc.)'",
-    "format": "echo 'Add formatting tool here (prettier, biome, etc.)'",
-    "clean": "rm -rf coverage/ node_modules/.cache/"
-  },
-  "keywords": ["claude", "ai", "job-processing", "api", "batch"],
+  "type": "module",
+  "description": "Professional Claude job management API and Chrome extension monorepo",
+  "keywords": ["claude", "ai", "job-processing", "api", "batch", "chrome-extension"],
   "author": "",
   "license": "MIT",
-  "description": "Professional Claude job management API with clean architecture and comprehensive testing",
-  "dependencies": {
-    "chalk": "^5.3.0",
-    "hono": "^4.8.12"
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "cd packages/api && bun run dev",
+    "dev:api": "cd packages/api && bun run dev",
+    "dev:extension": "cd packages/extension && bun run dev",
+    "start": "cd packages/api && bun run start",
+    "build": "bun run build:api && bun run build:extension",
+    "build:api": "cd packages/api && bun run build",
+    "build:extension": "cd packages/extension && bun run build",
+    "test": "cd packages/api && bun run test",
+    "test:api": "cd packages/api && bun run test",
+    "test:watch": "cd packages/api && bun run test:watch",
+    "test:coverage": "cd packages/api && bun run test:coverage",
+    "test:integration": "cd packages/api && bun run test:integration",
+    "test:unit": "cd packages/api && bun run test:unit",
+    "type-check": "bun run type-check:api && bun run type-check:extension",
+    "type-check:api": "cd packages/api && bun run type-check",
+    "type-check:extension": "cd packages/extension && bun run type-check",
+    "lint": "echo 'Add linting tool here (eslint, biome, etc.)'",
+    "format": "echo 'Add formatting tool here (prettier, biome, etc.)'",
+    "clean": "rm -rf packages/*/node_modules packages/*/dist packages/*/coverage"
   },
-  "devDependencies": { "@types/bun": "^1.2.20", "@types/node": "^24.3.0", "typescript": "^5.9.2" },
   "engines": {
     "bun": ">=1.0.0"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.2.20",
+    "@types/node": "^24.3.0",
+    "typescript": "^5.9.2"
   }
 }

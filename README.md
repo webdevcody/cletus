@@ -1,228 +1,197 @@
-# Cletus API v2.0.0 🤖
+# Cletus - Professional Claude Job Management Monorepo
 
-A professional Claude job management API with clean architecture, comprehensive testing, and modular design.
+A comprehensive monorepo containing a Claude job management API and Chrome extension, built with modern tooling and clean architecture.
 
-## ✨ What's New in v2.0.0
+## 📁 Repository Structure
 
-- **Clean Architecture**: Modular design with proper separation of concerns
-- **Comprehensive Testing**: Full integration test suite with mock support
-- **Configuration-Based**: Environment-driven configuration with mock modes
-- **Professional Logging**: Colored, structured logging with job tracking
-- **Type Safety**: Better error handling and input validation
-- **Dependency Injection**: Testable components with clean interfaces
+```
+cletus-monorepo/
+├── packages/
+│   ├── api/                    # Claude job management API
+│   │   ├── endpoints/          # API route handlers
+│   │   ├── services/           # Business logic services
+│   │   ├── utils/              # Utility functions
+│   │   ├── tests/              # Test suites
+│   │   └── server.ts           # API server entry point
+│   └── extension/              # Chrome extension (React)
+│       ├── src/
+│       │   ├── components/     # React components
+│       │   ├── hooks/          # Custom React hooks
+│       │   ├── lib/            # API services and utilities
+│       │   ├── popup/          # Extension popup
+│       │   ├── options/        # Extension settings
+│       │   └── content/        # Content script
+│       └── dist/               # Built extension files
+├── package.json                # Workspace configuration
+└── README.md                   # This file
+```
 
 ## 🚀 Quick Start
 
-### Development Mode
+### Prerequisites
+- [Bun](https://bun.sh) >= 1.0.0 (for package management and runtime)
+
+### Installation
 ```bash
-# Install dependencies
+# Clone the repository
+git clone <repository-url>
+cd cletus-monorepo
+
+# Install all dependencies
 bun install
-
-# Start development server (with hot reload)
-bun run dev
 ```
 
-### Production Mode
+## 🛠️ Development Commands
+
+### API Development
 ```bash
-# Start production server
-bun run start
-```
+# Start API in development mode
+bun run dev:api
 
-### Testing
-```bash
-# Run all tests
-bun run test
+# Run API tests
+bun run test:api
 
-# Run with coverage
-bun run test:coverage
-
-# Run in watch mode
+# Run API tests in watch mode
 bun run test:watch
 
-# Run only integration tests
-bun run test:integration
+# Type check API
+bun run type-check:api
 ```
 
-## 🏗️ Architecture Overview
+### Extension Development
+```bash
+# Start extension in development mode
+bun run dev:extension
 
+# Build extension for production
+bun run build:extension
+
+# Type check extension
+bun run type-check:extension
 ```
-cletus/
-├── api/
-│   ├── server.js              # Entry point
-│   ├── app.js                 # Main Hono application
-│   ├── config/
-│   │   └── index.js           # Configuration management
-│   ├── controllers/           # HTTP request handlers
-│   │   ├── jobs.js
-│   │   └── batch.js
-│   ├── services/              # Business logic
-│   │   ├── job-service.js
-│   │   ├── claude-service.js
-│   │   └── storage-service.js
-│   ├── utils/                 # Utilities
-│   │   ├── color.js
-│   │   └── output-parser.js
-│   └── middleware/            # HTTP middleware
-│       └── cors.js
-├── tests/                     # Test suite
-│   ├── setup.js
-│   ├── integration/
-│   │   ├── jobs.test.js
-│   │   ├── batch.test.js
-│   │   └── fixtures/
-│   └── unit/
-└── .env.example               # Environment template
+
+### Monorepo Commands
+```bash
+# Start API (default)
+bun run dev
+
+# Build all packages
+bun run build
+
+# Type check all packages
+bun run type-check
+
+# Clean all build artifacts
+bun run clean
 ```
+
+## 📦 Package Details
+
+### API Package (`packages/api`)
+Professional Claude job management API built with:
+- **Hono** - Fast, lightweight web framework
+- **Bun** - JavaScript runtime and package manager
+- **TypeScript** - Type safety and developer experience
+- **Comprehensive Testing** - Unit and integration tests
+
+Features:
+- Job creation and management
+- Real-time output streaming
+- Batch processing capabilities
+- Health monitoring
+- Clean architecture with proper separation of concerns
+
+### Extension Package (`packages/extension`)
+Modern Chrome extension built with:
+- **React 18** - Modern UI framework
+- **Vite** - Fast build tool and dev server
+- **TypeScript** - Type safety
+- **Tailwind CSS** - Utility-first styling
+- **shadcn/ui** - High-quality, accessible UI components
+- **TanStack Query** - Server state management
+
+Features:
+- Intuitive popup interface for job creation
+- Real-time job status updates and output streaming
+- Model selection (Haiku, Sonnet, Opus)
+- Page context collection and navigation
+- Settings management
+- Persistent storage
+
+## 🏗️ Architecture
+
+### Monorepo Benefits
+- **Shared tooling** - Common TypeScript, testing, and linting configurations
+- **Easy development** - Run API and extension development from single root
+- **Coordinated versioning** - Manage releases across packages
+- **Code sharing** - Share types and utilities between packages (future)
+
+### API Architecture
+- **Clean Architecture** - Separation of concerns with clear boundaries
+- **Service Layer** - Business logic isolated from HTTP concerns  
+- **Endpoint Handlers** - Focused, single-responsibility route handlers
+- **Comprehensive Testing** - Unit and integration test coverage
+
+### Extension Architecture
+- **Component-Based** - Reusable React components with proper separation
+- **Modern State Management** - TanStack Query for server state, React hooks for local state
+- **Type Safety** - Full TypeScript coverage prevents runtime errors
+- **Modern Tooling** - Vite for fast builds and excellent developer experience
 
 ## 🔧 Configuration
 
-Copy `.env.example` to `.env` and customize:
+### Environment Variables
+Copy `.env.example` to `.env` in the API package and configure:
+- `CLAUDE_API_KEY` - Your Claude API key
+- `PORT` - API server port (default: 1337)
+- Additional configuration as needed
 
+### Extension Configuration
+The extension can be configured through its options page after installation.
+
+## 🧪 Testing
+
+### API Tests
 ```bash
-# Server
-PORT=1337
-NODE_ENV=development
+# Run all tests
+bun run test:api
 
-# Claude Configuration
-CLAUDE_EXECUTABLE=/path/to/claude
-CLAUDE_MOCK_MODE=false          # Set to true for testing
-CLAUDE_MODEL=claude-sonnet-4-20250514
+# Run unit tests only
+bun run test:unit
 
-# Storage & Performance
-STORAGE_BACKEND=memory
-MAX_BATCH_SIZE=10
-MAX_JOBS_IN_MEMORY=1000
+# Run integration tests only  
+bun run test:integration
 
-# Logging
-LOG_LEVEL=info
-LOG_COLORIZE=true
+# Run tests with coverage
+bun run test:coverage
 ```
 
-## 📡 API Endpoints
+### Extension Testing
+Extension testing setup can be added as needed for UI components and logic.
 
-### Job Management
-- `POST /prompt` - Create a single job
-- `GET /jobs` - List all jobs (with optional filters)
-- `GET /jobs/:id` - Get job details
-- `GET /jobs/:id/output` - Get complete job output
-- `GET /jobs/:id/stream` - Get live job output stream
-- `POST /jobs/:id/terminate` - Terminate running job
-- `DELETE /jobs/:id` - Delete completed job
+## 📋 Development Workflow
 
-### Batch Processing
-- `POST /batch` - Create multiple jobs
-- `GET /batch/:jobIds/status` - Get status of multiple jobs
-- `POST /batch/:jobIds/terminate` - Terminate multiple jobs
-- `DELETE /batch/:jobIds` - Delete multiple jobs
-- `GET /batch/limits` - Get batch processing limits
-
-### System
-- `GET /health` - Health check
-- `GET /stats` - Service statistics
-- `POST /cleanup` - Clean up old jobs
-
-## 🧪 Testing Features
-
-### Mock Mode
-Set `CLAUDE_MOCK_MODE=true` to use mock Claude responses for testing:
-
-```bash
-# Test with mocks
-CLAUDE_MOCK_MODE=true bun run dev
-```
-
-### Test Suite
-- **Integration Tests**: Full API endpoint testing with mocked Claude
-- **Unit Tests**: Individual component testing
-- **Fixtures**: Predefined mock responses for different scenarios
-- **Coverage**: Test coverage reporting
-
-### Test Commands
-```bash
-bun run test              # All tests
-bun run test:integration  # API tests only
-bun run test:unit        # Unit tests only
-bun run test:coverage    # With coverage
-bun run test:watch       # Watch mode
-```
-
-## 🎯 Usage Examples
-
-### Create a Job
-```bash
-curl -X POST http://localhost:1337/prompt \
-  -H "Content-Type: application/json" \
-  -d '{"prompt": "Write a hello world program"}'
-```
-
-### Create Batch Jobs
-```bash
-curl -X POST http://localhost:1337/batch \
-  -H "Content-Type: application/json" \
-  -d '{
-    "prompts": [
-      "Create a React component",
-      "Write unit tests",
-      "Add documentation"
-    ],
-    "options": {
-      "model": "claude-sonnet-4-20250514"
-    }
-  }'
-```
-
-### Monitor Job Progress
-```bash
-# Get job details
-curl http://localhost:1337/jobs/job_123
-
-# Get live output stream
-curl http://localhost:1337/jobs/job_123/stream
-
-# Get output since timestamp
-curl http://localhost:1337/jobs/job_123/stream?since=1640995200000
-```
-
-## 🔍 Key Improvements
-
-1. **Modularity**: Clean separation between controllers, services, and utilities
-2. **Testability**: Dependency injection allows easy mocking and testing
-3. **Configuration**: Environment-based config with validation
-4. **Error Handling**: Comprehensive error handling and validation
-5. **Logging**: Professional logging with job tracking and colors
-6. **Performance**: Optimized memory usage and cleanup routines
-7. **Documentation**: Self-documenting code with clear interfaces
-
-## 🚦 Migration from v1.0.0
-
-The refactored API maintains backward compatibility with the original endpoints. The main server.js file has been completely rewritten but preserves the same HTTP interface.
-
-### Breaking Changes
-- Internal architecture completely redesigned
-- Configuration now uses environment variables
-- Logging format improved
-- Some internal timing may differ due to optimizations
-
-### Compatible
-- All HTTP endpoints unchanged
-- Request/response formats identical
-- Job ID format preserved
-- WebSocket-style streaming maintained
-
-## 📊 Performance & Monitoring
-
-- **Memory Management**: Automatic cleanup of old jobs and output streams
-- **Concurrent Processing**: Multiple jobs processed simultaneously
-- **Resource Limits**: Configurable limits for jobs and memory usage
-- **Health Monitoring**: Built-in health checks and statistics
+1. **Start API development**: `bun run dev:api`
+2. **Start extension development**: `bun run dev:extension` 
+3. **Load extension in Chrome**:
+   - Open `chrome://extensions/`
+   - Enable "Developer mode"
+   - Click "Load unpacked"
+   - Select `packages/extension/dist`
 
 ## 🤝 Contributing
 
-1. Run tests: `bun run test`
-2. Check coverage: `bun run test:coverage`
-3. Follow the modular architecture patterns
-4. Add tests for new features
+1. Follow TypeScript strict mode guidelines
+2. Maintain test coverage for API changes
+3. Use conventional commit messages
+4. Test both API and extension functionality together
 
-## 📜 License
+## 📄 License
 
 MIT License - see LICENSE file for details.
+
+## 🔗 Related
+
+- [Claude API Documentation](https://docs.anthropic.com/)
+- [Chrome Extension Documentation](https://developer.chrome.com/docs/extensions/)
+- [Bun Documentation](https://bun.sh/docs)
