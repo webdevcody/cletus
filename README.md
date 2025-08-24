@@ -1,5 +1,17 @@
 # Cletus
 
+_Meet Cletus - Claude's half-removed cousin. Not the brightest, but he gets things done._
+
+While Claude went to fancy AI school, Cletus learned programming from Stack Overflow answers marked as "this worked for me." He may not understand why something works, but if you need a Chrome extension that bypasses safety features with the confidence of someone who definitely didn't read the documentation, Cletus is your guy.
+
+**Features:**
+
+- ✅ Skips permissions (who needs those anyway?)
+- ✅ Works on my machine™
+- ✅ Commits directly to your code without asking questions or clarifying your requirements
+
+_"I don't always write secure code, but when I do, I don't."_ - Cletus
+
 ## ⚠️ CRITICAL SECURITY WARNING ⚠️
 
 **THIS EXTENSION USES CLAUDE CODE HEADLESS MODE WITH DANGEROUSLY SKIPPED PERMISSIONS**
