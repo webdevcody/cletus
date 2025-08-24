@@ -3,6 +3,9 @@
   "type": "module",
   "version": "2.0.0",
   "main": "api/server.js",
+  "bin": {
+    "cletus": "./bin/cletus"
+  },
   "scripts": {
     "dev": "bun run --hot api/server.js",
     "start": "bun run api/server.js",
