@@ -1,5 +1,18 @@
 # Cletus
 
+## ⚠️ CRITICAL SECURITY WARNING ⚠️
+
+**THIS EXTENSION USES CLAUDE CODE HEADLESS MODE WITH DANGEROUSLY SKIPPED PERMISSIONS**
+
+By using this extension, you acknowledge that:
+- **Agentic prompts have extensive access to your machine and files**
+- **Claude Code Hooks, Commands, and Subagents can execute with dangerous permissions**
+- **This poses significant security risks to your system and data**
+
+**USE AT YOUR OWN RISK. This tool should only be used in isolated/sandboxed environments.**
+
+---
+
 ## Installation
 
 1. Install dependencies:
