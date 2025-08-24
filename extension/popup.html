@@ -1,0 +1,268 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Claude Agent</title>
+    <style>
+      :root {
+        --bg: #ffffff;
+        --fg: #0f172a;
+        --muted: #64748b;
+        --border: #e2e8f0;
+        --card: #f8fafc;
+        --primary: #0ea5e9;
+        --primary-foreground: #ffffff;
+        --ring: rgba(14, 165, 233, 0.35);
+        --code-bg: #0f172a;
+        --code-fg: #e2e8f0;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #0b1220;
+          --fg: #e5e7eb;
+          --muted: #94a3b8;
+          --border: #1f2937;
+          --card: #0f172a;
+          --primary: #38bdf8;
+          --primary-foreground: #0b1220;
+          --ring: rgba(56, 189, 248, 0.35);
+          --code-bg: #111827;
+          --code-fg: #e5e7eb;
+        }
+      }
+      body {
+        color-scheme: light dark;
+        font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+        margin: 0;
+        padding: 12px;
+        width: 780px;
+        background: var(--bg);
+        color: var(--fg);
+        max-height: 600px;
+        overflow: hidden;
+      }
+      .main-container {
+        display: flex;
+        gap: 12px;
+        height: 100%;
+        min-width: 0; /* Allow flex items to shrink below their content size */
+      }
+      .left-panel {
+        width: 360px;
+        flex-shrink: 0;
+      }
+      .right-panel {
+        flex: 1;
+        display: none;
+        flex-direction: column;
+        border-left: 1px solid var(--border);
+        padding-left: 12px;
+        min-width: 0; /* Allow shrinking */
+        overflow: hidden; /* Prevent overflow */
+      }
+      h1 {
+        font-size: 16px;
+        margin: 0 0 10px;
+        font-weight: 700;
+      }
+      .row { margin: 10px 0; }
+      .actions { display: flex; gap: 8px; align-items: center; }
+      .field {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 8px;
+      }
+      textarea {
+        width: 100%;
+        min-height: 96px;
+        box-sizing: border-box;
+        resize: vertical;
+        background: transparent;
+        border: none;
+        outline: none;
+        color: var(--fg);
+      }
+      textarea::placeholder { color: var(--muted); }
+      .field:focus-within {
+        box-shadow: 0 0 0 3px var(--ring);
+      }
+      button {
+        cursor: pointer;
+        padding: 8px 12px;
+        border-radius: 8px;
+        border: 1px solid var(--border);
+        background: var(--primary);
+        color: var(--primary-foreground);
+        font-weight: 600;
+      }
+      button:hover { filter: brightness(0.98); }
+      button.secondary {
+        background: transparent;
+        color: var(--fg);
+      }
+      button:disabled { opacity: 0.6; cursor: not-allowed; }
+      .muted { color: var(--muted); font-size: 12px; }
+      pre {
+        background: var(--code-bg);
+        color: var(--code-fg);
+        padding: 10px;
+        border-radius: 10px;
+        max-height: 260px;
+        overflow: auto;
+        white-space: pre-wrap;
+        border: 1px solid var(--border);
+      }
+      .small { font-size: 12px; }
+      .spinner {
+        width: 16px;
+        height: 16px;
+        border: 2px solid var(--border);
+        border-top-color: var(--primary-foreground);
+        border-right-color: var(--primary-foreground);
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+      }
+      @keyframes spin { to { transform: rotate(360deg); } }
+      .output-header {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 10px;
+        padding-bottom: 8px;
+        border-bottom: 1px solid var(--border);
+      }
+      .output-title {
+        font-weight: 600;
+        flex: 1;
+      }
+      .output-status {
+        font-size: 12px;
+        padding: 2px 6px;
+        border-radius: 4px;
+      }
+      .output-status.running {
+        background: var(--primary);
+        color: var(--primary-foreground);
+      }
+      .output-status.completed {
+        background: #22c55e;
+        color: white;
+      }
+      .output-status.failed {
+        background: #ef4444;
+        color: white;
+      }
+      .output-console {
+        flex: 1;
+        background: var(--code-bg);
+        color: var(--code-fg);
+        border-radius: 6px;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        min-height: 200px;
+        max-height: 400px;
+      }
+      .output-content {
+        flex: 1;
+        overflow-y: auto;
+        overflow-x: hidden;
+        padding: 12px;
+        font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Fira Code', 'Droid Sans Mono', 'Source Code Pro', monospace;
+        font-size: 12px;
+        line-height: 1.4;
+        white-space: pre-wrap;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+      }
+      .output-chunk {
+        margin-bottom: 2px;
+      }
+      .output-chunk.stdout {
+        color: var(--code-fg);
+      }
+      .output-chunk.stderr {
+        color: #fbbf24;
+      }
+      .output-chunk.error {
+        color: #ef4444;
+      }
+      .output-chunk.system {
+        color: #22c55e;
+        font-style: italic;
+      }
+      .close-output {
+        background: transparent;
+        border: none;
+        color: var(--muted);
+        cursor: pointer;
+        font-size: 18px;
+        padding: 4px;
+      }
+      .close-output:hover {
+        color: var(--fg);
+      }
+      .clickable-job {
+        cursor: pointer;
+      }
+      .clickable-job:hover {
+        background: var(--card);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="main-container">
+      <div class="left-panel">
+        <h1>Cletus</h1>
+        <div class="row field">
+          <textarea id="prompt" placeholder="Describe the feature or edit you want..." autofocus></textarea>
+        </div>
+        <div class="row">
+          <label style="display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--muted); cursor: pointer;">
+            <input type="checkbox" id="includePath" checked style="margin: 0;">
+            <span>Include current path: <span id="currentPath" style="font-family: monospace; color: var(--fg);">/loading...</span></span>
+          </label>
+        </div>
+        <div class="row">
+          <label style="display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--muted);">
+            <span>Model:</span>
+            <select id="modelSelect" style="margin: 0; padding: 2px 4px; border: 1px solid var(--border); border-radius: 4px; background: var(--bg); color: var(--fg); font-size: 12px;">
+              <option value="claude-3-5-haiku-20241022">Haiku 3.5 (Fast)</option>
+              <option value="claude-sonnet-4-20250514" selected>Sonnet 4 (Balanced)</option>
+              <option value="claude-opus-4-1-20250805">Opus 4.1 (Best)</option>
+            </select>
+          </label>
+        </div>
+        <div class="actions">
+          <button id="send">Send</button>
+          <span id="spinner" class="spinner" style="display:none" aria-hidden="true"></span>
+          <button id="clearCompleted" class="secondary" title="Clear completed jobs">Clear Completed</button>
+          <button id="openOptions" class="secondary">Settings</button>
+        </div>
+        <div id="status" class="muted" aria-live="polite" style="display:none; margin-top: 6px;"></div>
+        <div id="jobs" class="small" style="margin-top: 8px; display:none;"></div>
+      </div>
+      
+      <div class="right-panel" id="outputPanel">
+        <div class="output-header" id="outputHeader" style="display: none;">
+          <div class="output-title" id="outputTitle">Process Output</div>
+          <div class="output-status" id="outputStatus">running</div>
+          <button class="close-output" id="closeOutput" title="Close output panel">×</button>
+        </div>
+        <div class="output-console">
+          <div class="output-content" id="outputContent"></div>
+          <div class="empty-state" id="emptyState" style="display: flex; align-items: center; justify-content: center; height: 100%; color: var(--muted); text-align: center; font-size: 14px;">
+            <div>
+              <div style="font-size: 24px; margin-bottom: 8px;">📋</div>
+              <div>Click on a job to view its output</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <script src="popup.js" type="module"></script>
+  </body>
+</html>

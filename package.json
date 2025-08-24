@@ -1,0 +1,30 @@
+{
+  "name": "cletus",
+  "type": "module",
+  "version": "2.0.0",
+  "main": "api/server.js",
+  "scripts": {
+    "dev": "bun run --hot api/server.js",
+    "start": "bun run api/server.js",
+    "test": "bun test --config bun.test.config.js",
+    "test:watch": "bun test --watch --config bun.test.config.js",
+    "test:coverage": "bun test --coverage --config bun.test.config.js",
+    "test:integration": "bun test tests/integration/ --config bun.test.config.js",
+    "test:unit": "bun test tests/unit/ --config bun.test.config.js",
+    "lint": "echo 'Add linting tool here (eslint, biome, etc.)'",
+    "format": "echo 'Add formatting tool here (prettier, biome, etc.)'",
+    "clean": "rm -rf coverage/ node_modules/.cache/"
+  },
+  "keywords": ["claude", "ai", "job-processing", "api", "batch"],
+  "author": "",
+  "license": "MIT",
+  "description": "Professional Claude job management API with clean architecture and comprehensive testing",
+  "dependencies": {
+    "chalk": "^5.3.0",
+    "hono": "^4.8.12"
+  },
+  "devDependencies": {},
+  "engines": {
+    "bun": ">=1.0.0"
+  }
+}
